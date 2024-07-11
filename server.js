@@ -3,6 +3,9 @@ const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const fileupload = require("express-fileupload");
+const mongo = require("./dbMong");
+const client = mongo.client;
+const db = mongo.db;
 
 const employeeController = require("./controllers/EmployeeController");
 const memberController = require("./controllers/MemberController");
@@ -35,6 +38,56 @@ function isSignIn(req, res, next) {
     res.status(500).send({ error: error.message });
   }
 }
+
+app.get("/mongo/list", async (req, res) => {
+  try {
+    await client.connect();
+    const dbObject = client.db(db);
+    const member = dbObject.collection("member");
+    const rows = await member
+      .find({
+        "name.fname": "Tepsuwan",
+      })
+      .toArray();
+
+    res.send(rows);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.post("/mongo/create", async (req, res) => {
+  try {
+    await client.connect();
+    const dbObject = client.db(db);
+    const member = dbObject.collection("member");
+
+    const row = await member.insertOne({
+      name: "Stefan",
+      point: "1000",
+    });
+
+    res.send({ row });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.put("/mongo/put", async (req, res) => {
+  try {
+    await client.connect();
+    const dbObject = client.db(db);
+    const member = dbObject.collection("member");
+
+    const row = await member.updateOne({
+      { _id:("")}
+    });
+
+    res.send({ row });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
 
 //
 // upload
